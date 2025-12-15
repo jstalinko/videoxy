@@ -11,7 +11,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
-use Throwable;
 
 class ConvertVideoToHls implements ShouldQueue
 {
@@ -21,19 +20,15 @@ class ConvertVideoToHls implements ShouldQueue
 
     public function handle(): void
     {
-        $disk = Storage::disk($this->video->disk);
+        $inputPath = Storage::disk($this->video->disk)->path($this->video->storage_path);
+        $outputDir = 'videos/hls/'.$this->video->short_code;
+        $outputPath = Storage::disk($this->video->disk)->path($outputDir);
 
-        if (! $disk->exists($this->video->storage_path)) {
-            $this->video->update(['status' => 'failed']);
-
-            return;
+        if (! is_dir($outputPath)) {
+            mkdir($outputPath, 0755, true);
         }
 
-        $inputPath = $disk->path($this->video->storage_path);
-        $outputDir = 'videos/hls/'.$this->video->short_code;
-        $disk->makeDirectory($outputDir);
-
-        $outputFile = $disk->path($outputDir.'/index.m3u8');
+        $outputFile = $outputPath.'/index.m3u8';
         $playlistPath = $outputDir.'/index.m3u8';
 
         $process = new Process([
@@ -47,7 +42,7 @@ class ConvertVideoToHls implements ShouldQueue
             '-c:a',
             'aac',
             '-hls_time',
-            '6',
+            '10',
             '-hls_playlist_type',
             'vod',
             '-f',
@@ -55,19 +50,18 @@ class ConvertVideoToHls implements ShouldQueue
             $outputFile,
         ]);
 
-        try {
-            $process->setTimeout(600);
-            $process->mustRun();
+        $process->setTimeout(600);
+        $process->run();
 
+        if ($process->isSuccessful()) {
             $this->video->update([
                 'hls_path' => $playlistPath,
                 'status' => 'ready',
             ]);
-        } catch (Throwable $exception) {
+        } else {
             Log::error('HLS conversion failed', [
                 'video_id' => $this->video->id,
-                'error' => $exception->getMessage(),
-                'stderr' => method_exists($exception, 'getProcess') ? $exception->getProcess()->getErrorOutput() : null,
+                'error' => $process->getErrorOutput(),
             ]);
 
             $this->video->update([

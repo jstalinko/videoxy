@@ -66,17 +66,8 @@
                 Select Video
               </span>
             </label>
-            <p class="text-white/40 text-sm mt-6">Max file size: 50MB • Supports MP4, MOV, AVI, WebM</p>
+            <p class="text-white/40 text-sm mt-6">Max file size: 2MB • Supports MP4, MOV, AVI, WebM</p>
             <p v-if="error" class="text-pink-200 mt-3">{{ error }}</p>
-            <div v-if="uploading" class="w-full mt-4">
-              <div class="h-3 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
-                  :style="{ width: uploadProgress + '%' }"
-                ></div>
-              </div>
-              <p class="text-white/70 text-sm mt-2">Uploading... {{ uploadProgress }}%</p>
-            </div>
           </div>
         </div>
 
@@ -274,9 +265,7 @@ export default {
       uploadedFile: null,
       isPlaying: false,
       isMuted: false,
-      playerProgress: 0,
-      uploadProgress: 0,
-      uploading: false,
+      progress: 0,
       views: 0,
       copied: false,
       error: '',
@@ -317,7 +306,6 @@ export default {
     handleFileInput(e) {
       const file = e.target.files[0]
       if (file) {
-        this.triggerAd('upload')
         this.processFile(file)
       }
     },
@@ -328,8 +316,8 @@ export default {
         return
       }
 
-      if (file.size > 50 * 1024 * 1024) {
-        this.error = 'Maksimal ukuran video adalah 50MB.'
+      if (file.size > 2 * 1024 * 1024) {
+        this.error = 'Maksimal ukuran video adalah 2MB.'
         return
       }
 
@@ -337,56 +325,33 @@ export default {
       formData.append('file', file)
 
       const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      this.uploading = true
-      this.uploadProgress = 0
 
-      await new Promise((resolve) => {
-        const request = new XMLHttpRequest()
-        request.open('POST', '/api/videos')
-        if (csrf) {
-          request.setRequestHeader('X-CSRF-TOKEN', csrf)
-        }
+      const response = await fetch('/api/videos', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrf || ''
+        },
+        body: formData
+      })
 
-        request.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            this.uploadProgress = Math.round((event.loaded / event.total) * 100)
-          }
-        }
+      if (!response.ok) {
+        this.error = 'Upload gagal, silakan coba lagi.'
+        return
+      }
 
-        request.onerror = () => {
-          this.error = 'Upload gagal, silakan coba lagi.'
-          this.uploading = false
-          resolve(null)
-        }
+      const data = await response.json()
 
-        request.onload = () => {
-          this.uploading = false
-          if (request.status >= 200 && request.status < 300) {
-            try {
-              const data = JSON.parse(request.responseText)
-              this.uploadProgress = 100
-              this.uploadedFile = {
-                name: data.name,
-                size: data.size_mb,
-                url: data.playback_url,
-                shareUrl: data.share_url,
-                status: data.status
-              }
-              this.views = 1
-              this.$nextTick(() => {
-                const video = this.$refs.videoPlayer
-                video?.load()
-              })
-            } catch (e) {
-              this.error = 'Upload gagal, silakan coba lagi.'
-            }
-          } else {
-            this.error = 'Upload gagal, silakan coba lagi.'
-          }
-          resolve(null)
-        }
-
-        request.send(formData)
+      this.uploadedFile = {
+        name: data.name,
+        size: data.size_mb,
+        url: data.playback_url,
+        shareUrl: data.share_url,
+        status: data.status
+      }
+      this.views = 1
+      this.$nextTick(() => {
+        const video = this.$refs.videoPlayer
+        video?.load()
       })
     },
     handlePlay() {
@@ -416,15 +381,13 @@ export default {
     updateProgress() {
       const video = this.$refs.videoPlayer
       if (video?.duration) {
-        this.playerProgress = (video.currentTime / video.duration) * 100
+        this.progress = (video.currentTime / video.duration) * 100
       }
     },
     resetUpload() {
       this.uploadedFile = null
       this.isPlaying = false
-      this.playerProgress = 0
-      this.uploadProgress = 0
-      this.uploading = false
+      this.progress = 0
       this.views = 0
       this.copied = false
       this.uploadAdShown = false
