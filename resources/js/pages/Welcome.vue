@@ -316,8 +316,8 @@ export default {
         return
       }
 
-      if (file.size > 2 * 1024 * 1024) {
-        this.error = 'Maksimal ukuran video adalah 2MB.'
+      if (file.size > 50 * 1024 * 1024) {
+        this.error = 'Maksimal ukuran video adalah 50MB. ';
         return
       }
 
