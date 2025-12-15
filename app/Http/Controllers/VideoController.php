@@ -16,10 +16,9 @@ class VideoController extends Controller
 {
     public function store(Request $request): JsonResource
     {
-      $validated = $request->validate([
-    'file' => 'required|file|max:51200|mimetypes:video/*',
-]);
-
+        $validated = $request->validate([
+            'file' => 'required|file|max:51200|mimetypes:video/*',
+        ]);
 
         $file = $validated['file'];
         $path = $file->store('videos/uploads', 'public');
