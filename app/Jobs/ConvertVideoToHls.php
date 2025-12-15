@@ -11,6 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class ConvertVideoToHls implements ShouldQueue
 {
@@ -20,16 +21,25 @@ class ConvertVideoToHls implements ShouldQueue
 
     public function handle(): void
     {
-        $inputPath = Storage::disk($this->video->disk)->path($this->video->storage_path);
-        $outputDir = 'videos/hls/'.$this->video->short_code;
-        $outputPath = Storage::disk($this->video->disk)->path($outputDir);
+        $disk = Storage::disk($this->video->disk);
 
-        if (! is_dir($outputPath)) {
-            mkdir($outputPath, 0755, true);
+        if (! $disk->exists($this->video->storage_path)) {
+            Log::warning('Original video missing for conversion', [
+                'video_id' => $this->video->id,
+                'storage_path' => $this->video->storage_path,
+            ]);
+            $this->video->update(['status' => 'failed']);
+
+            return;
         }
 
-        $outputFile = $outputPath.'/index.m3u8';
+        $inputPath = $disk->path($this->video->storage_path);
+        $outputDir = 'videos/hls/'.$this->video->short_code;
+        $disk->makeDirectory($outputDir);
+
+        $outputFile = $disk->path($outputDir.'/index.m3u8');
         $playlistPath = $outputDir.'/index.m3u8';
+        $segmentsPattern = $disk->path($outputDir.'/%03d.ts');
 
         $process = new Process([
             'ffmpeg',
@@ -42,26 +52,29 @@ class ConvertVideoToHls implements ShouldQueue
             '-c:a',
             'aac',
             '-hls_time',
-            '10',
+            '6',
             '-hls_playlist_type',
             'vod',
+            '-hls_segment_filename',
+            $segmentsPattern,
             '-f',
             'hls',
             $outputFile,
         ]);
 
-        $process->setTimeout(600);
-        $process->run();
+        try {
+            $process->setTimeout(600);
+            $process->mustRun();
 
-        if ($process->isSuccessful()) {
             $this->video->update([
                 'hls_path' => $playlistPath,
                 'status' => 'ready',
             ]);
-        } else {
+        } catch (Throwable $exception) {
             Log::error('HLS conversion failed', [
                 'video_id' => $this->video->id,
-                'error' => $process->getErrorOutput(),
+                'error' => $exception->getMessage(),
+                'stderr' => method_exists($exception, 'getProcess') ? $exception->getProcess()->getErrorOutput() : null,
             ]);
 
             $this->video->update([

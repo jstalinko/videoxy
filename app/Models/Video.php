@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Video extends Model
@@ -34,10 +35,10 @@ class Video extends Model
     public function playbackUrl(): ?string
     {
         if ($this->hls_path) {
-            return asset('storage/'.$this->hls_path);
+            return Storage::disk($this->disk)->url($this->hls_path);
         }
 
-        return asset('storage/'.$this->storage_path);
+        return Storage::disk($this->disk)->url($this->storage_path);
     }
 
     public function shareUrl(): string

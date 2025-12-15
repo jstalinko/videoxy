@@ -66,8 +66,17 @@
                 Select Video
               </span>
             </label>
-            <p class="text-white/40 text-sm mt-6">Max file size: 2MB • Supports MP4, MOV, AVI, WebM</p>
+            <p class="text-white/40 text-sm mt-6">Max file size: 50MB • Supports MP4, MOV, AVI, WebM</p>
             <p v-if="error" class="text-pink-200 mt-3">{{ error }}</p>
+            <div v-if="uploading" class="w-full mt-4">
+              <div class="h-3 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+                  :style="{ width: uploadProgress + '%' }"
+                ></div>
+              </div>
+              <p class="text-white/70 text-sm mt-2">Uploading... {{ uploadProgress }}%</p>
+            </div>
           </div>
         </div>
 
@@ -265,12 +274,15 @@ export default {
       uploadedFile: null,
       isPlaying: false,
       isMuted: false,
-      progress: 0,
+      playerProgress: 0,
+      uploadProgress: 0,
+      uploading: false,
       views: 0,
       copied: false,
       error: '',
       uploadAdShown: false,
-      playAdShown: false
+      playAdShown: false,
+      statusInterval: null
     }
   },
   computed: {
@@ -306,6 +318,7 @@ export default {
     handleFileInput(e) {
       const file = e.target.files[0]
       if (file) {
+        this.triggerAd('upload')
         this.processFile(file)
       }
     },
@@ -316,8 +329,8 @@ export default {
         return
       }
 
-      if (file.size > 2 * 1024 * 1024) {
-        this.error = 'Maksimal ukuran video adalah 2MB.'
+      if (file.size > 50 * 1024 * 1024) {
+        this.error = 'Maksimal ukuran video adalah 50MB.'
         return
       }
 
@@ -325,33 +338,59 @@ export default {
       formData.append('file', file)
 
       const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      this.uploading = true
+      this.uploadProgress = 0
 
-      const response = await fetch('/api/videos', {
-        method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': csrf || ''
-        },
-        body: formData
-      })
+      await new Promise((resolve) => {
+        const request = new XMLHttpRequest()
+        request.open('POST', '/api/videos')
+        if (csrf) {
+          request.setRequestHeader('X-CSRF-TOKEN', csrf)
+        }
 
-      if (!response.ok) {
-        this.error = 'Upload gagal, silakan coba lagi.'
-        return
-      }
+        request.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            this.uploadProgress = Math.round((event.loaded / event.total) * 100)
+          }
+        }
 
-      const data = await response.json()
+        request.onerror = () => {
+          this.error = 'Upload gagal, silakan coba lagi.'
+          this.uploading = false
+          resolve(null)
+        }
 
-      this.uploadedFile = {
-        name: data.name,
-        size: data.size_mb,
-        url: data.playback_url,
-        shareUrl: data.share_url,
-        status: data.status
-      }
-      this.views = 1
-      this.$nextTick(() => {
-        const video = this.$refs.videoPlayer
-        video?.load()
+        request.onload = () => {
+          this.uploading = false
+          if (request.status >= 200 && request.status < 300) {
+            try {
+              const payload = JSON.parse(request.responseText)
+              const data = payload.data ?? payload
+              this.uploadProgress = 100
+              this.uploadedFile = {
+                name: data.name,
+                size: data.size_mb,
+                url: data.playback_url,
+                shareUrl: data.share_url,
+                status: data.status,
+                shortCode: data.short_code
+              }
+              this.views = data.views ?? 0
+              this.startStatusPolling(data.short_code)
+              this.$nextTick(() => {
+                const video = this.$refs.videoPlayer
+                video?.load()
+              })
+            } catch (e) {
+              this.error = 'Upload gagal, silakan coba lagi.'
+            }
+          } else {
+            this.error = 'Upload gagal, silakan coba lagi.'
+          }
+          resolve(null)
+        }
+
+        request.send(formData)
       })
     },
     handlePlay() {
@@ -381,17 +420,23 @@ export default {
     updateProgress() {
       const video = this.$refs.videoPlayer
       if (video?.duration) {
-        this.progress = (video.currentTime / video.duration) * 100
+        this.playerProgress = (video.currentTime / video.duration) * 100
       }
     },
     resetUpload() {
       this.uploadedFile = null
       this.isPlaying = false
-      this.progress = 0
+      this.playerProgress = 0
+      this.uploadProgress = 0
+      this.uploading = false
       this.views = 0
       this.copied = false
       this.uploadAdShown = false
       this.playAdShown = false
+      if (this.statusInterval) {
+        clearInterval(this.statusInterval)
+        this.statusInterval = null
+      }
     },
     async copyLink() {
       if (!this.uploadedFile?.shareUrl) return
@@ -412,6 +457,42 @@ export default {
           this.uploadAdShown = true
         }
       }
+    },
+    startStatusPolling(shortCode) {
+      if (!shortCode) return
+      if (this.statusInterval) {
+        clearInterval(this.statusInterval)
+      }
+
+      this.statusInterval = setInterval(async () => {
+        const response = await fetch(`/api/videos/${shortCode}`)
+        if (!response.ok) return
+
+        const payload = await response.json()
+        const data = payload.data ?? payload
+        if (!data) return
+
+        this.uploadedFile = {
+          ...this.uploadedFile,
+          name: data.name,
+          size: data.size_mb,
+          url: data.playback_url,
+          shareUrl: data.share_url,
+          status: data.status,
+          shortCode: data.short_code
+        }
+        this.views = data.views ?? this.views
+
+        if (data.status === 'ready' || data.status === 'failed') {
+          clearInterval(this.statusInterval)
+          this.statusInterval = null
+        }
+      }, 3000)
+    }
+  },
+  beforeUnmount() {
+    if (this.statusInterval) {
+      clearInterval(this.statusInterval)
     }
   }
 }
