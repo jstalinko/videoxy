@@ -125,7 +125,7 @@
             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <div class="mb-2">
                 <div class="h-1 bg-white/20 rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" :style="{ width: progress + '%' }"></div>
+                <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" :style="{ width: playerProgress + '%' }"></div>
                 </div>
               </div>
               <div class="flex items-center justify-between">
