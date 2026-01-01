@@ -308,6 +308,11 @@ function handleFileInput(e) {
   }
 }
 
+function getCookie(name) {
+  const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'))
+  return m ? decodeURIComponent(m[1]) : ''
+}
+
 async function processFile(file) {
   error.value = ''
 
@@ -315,7 +320,6 @@ async function processFile(file) {
     error.value = 'Hanya file video yang diperbolehkan.'
     return
   }
-
   if (file.size > 50 * 1024 * 1024) {
     error.value = 'Maksimal ukuran video adalah 50MB.'
     return
@@ -324,16 +328,28 @@ async function processFile(file) {
   const formData = new FormData()
   formData.append('file', file)
 
-  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-
   uploading.value = true
   uploadProgress.value = 0
 
   await new Promise((resolve) => {
     const request = new XMLHttpRequest()
     request.open('POST', '/api/videos')
-    if (csrf) {
-      request.setRequestHeader('X-CSRF-TOKEN', csrf)
+
+    // penting supaya server anggap ini request AJAX + JSON response
+    request.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    request.setRequestHeader('Accept', 'application/json')
+
+    // pastikan cookie ikut (kalau beda subdomain / cross-site)
+    request.withCredentials = true
+
+    // ambil XSRF token dari cookie
+    const xsrf = getCookie('XSRF-TOKEN')
+    if (xsrf) {
+      request.setRequestHeader('X-XSRF-TOKEN', xsrf)
+    } else {
+      // fallback meta (kalau ada)
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      if (csrf) request.setRequestHeader('X-CSRF-TOKEN', csrf)
     }
 
     request.upload.onprogress = (event) => {
@@ -375,6 +391,8 @@ async function processFile(file) {
           error.value = 'Upload gagal, silakan coba lagi.'
         }
       } else {
+        // DEBUG: lihat response biar tahu CSRF mismatch / session expired
+        console.log('Upload failed:', request.status, request.responseText)
         error.value = 'Upload gagal, silakan coba lagi.'
       }
       resolve(null)
