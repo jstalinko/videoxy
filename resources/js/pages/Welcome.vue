@@ -5,7 +5,8 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div
+              class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
               <svg class="w-5 h-5 text-white" fill="white" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
@@ -27,7 +28,8 @@
       <div class="text-center mb-12">
         <h2 class="text-5xl font-bold text-white mb-4">
           Share Your Videos
-          <span class="block mt-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Instantly</span>
+          <span
+            class="block mt-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Instantly</span>
         </h2>
         <p class="text-xl text-white/70 max-w-2xl mx-auto">
           Upload, share, and watch videos without limits. Fast, simple, and free.
@@ -36,24 +38,16 @@
 
       <!-- Upload Area -->
       <div v-if="!uploadedFile" class="max-w-3xl mx-auto">
-        <div
-          @dragover="handleDragOver"
-          @dragleave="handleDragLeave"
-          @drop="handleDrop"
-          :class="[
-            'border-2 border-dashed rounded-2xl p-12 text-center transition-all',
-            isDragging ? 'border-purple-400 bg-purple-500/10' : 'border-white/20 bg-white/5'
-          ]"
-        >
+        <div @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" :class="[
+          'border-2 border-dashed rounded-2xl p-12 text-center transition-all',
+          isDragging ? 'border-purple-400 bg-purple-500/10' : 'border-white/20 bg-white/5'
+        ]">
           <div class="flex flex-col items-center">
-            <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-6">
+            <div
+              class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-6">
               <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
             <h3 class="text-2xl font-semibold text-white mb-2">Drop your video here</h3>
@@ -61,13 +55,19 @@
             <label class="cursor-pointer" @click="triggerAd('upload')">
               <input type="file" accept="video/*" class="hidden" @change="handleFileInput" />
               <span
-                class="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition inline-block"
-              >
+                class="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg transition inline-block">
                 Select Video
               </span>
             </label>
-            <p class="text-white/40 text-sm mt-6">Max file size: 2MB • Supports MP4, MOV, AVI, WebM</p>
+            <p class="text-white/40 text-sm mt-6">Max file size: 50MB • Supports MP4, MOV, AVI, WebM</p>
             <p v-if="error" class="text-pink-200 mt-3">{{ error }}</p>
+            <div v-if="uploading" class="w-full mt-4">
+              <div class="h-3 bg-white/10 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+                  :style="{ width: uploadProgress + '%' }"></div>
+              </div>
+              <p class="text-white/70 text-sm mt-2">Uploading... {{ uploadProgress }}%</p>
+            </div>
           </div>
         </div>
 
@@ -86,12 +86,8 @@
           <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
             <div class="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4">
               <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <h3 class="text-lg font-semibold text-white mb-2">Secure & Private</h3>
@@ -101,12 +97,8 @@
           <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
             <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
               <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
             </div>
             <h3 class="text-lg font-semibold text-white mb-2">Easy Sharing</h3>
@@ -125,7 +117,8 @@
             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <div class="mb-2">
                 <div class="h-1 bg-white/20 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" :style="{ width: playerProgress + '%' }"></div>
+                  <div class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+                    :style="{ width: playerProgress + '%' }"></div>
                 </div>
               </div>
               <div class="flex items-center justify-between">
@@ -140,20 +133,12 @@
                   </button>
                   <button @click="toggleMute" class="text-white hover:text-purple-400 transition">
                     <svg v-if="!isMuted" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                      />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     </svg>
                     <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
-                      />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                     </svg>
                   </button>
                   <span class="text-white/80 text-sm">{{ uploadedFile.name }}</span>
@@ -161,7 +146,8 @@
                 <div class="flex items-center space-x-2">
                   <button class="text-white hover:text-purple-400 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                     </svg>
                   </button>
                 </div>
@@ -178,13 +164,10 @@
                   <span>{{ uploadedFile.size }} MB</span>
                   <span class="flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                     {{ views }} views
                   </span>
@@ -194,30 +177,26 @@
             </div>
 
             <div class="grid grid-cols-3 gap-3">
-              <button class="flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition">
+              <button
+                class="flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                  />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
                 <span>Share</span>
               </button>
 
-              <a
-                class="flex items-center justify-center space-x-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition"
-                :href="uploadedFile.url"
-                download
-              >
+              <a class="flex items-center justify-center space-x-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition"
+                :href="uploadedFile.url" download>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 <span>Download</span>
               </a>
 
-              <button @click="resetUpload" class="flex items-center justify-center space-x-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition">
+              <button @click="resetUpload"
+                class="flex items-center justify-center space-x-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -229,13 +208,10 @@
             <div class="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
               <p class="text-white/60 text-sm mb-2">Shareable Link</p>
               <div class="flex items-center space-x-2">
-                <input
-                  type="text"
-                  readonly
-                  :value="uploadedFile.shareUrl"
-                  class="flex-1 px-3 py-2 bg-black/20 text-white rounded border border-white/10 text-sm"
-                />
-                <button @click="copyLink" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded transition text-sm">
+                <input type="text" readonly :value="uploadedFile.shareUrl"
+                  class="flex-1 px-3 py-2 bg-black/20 text-white rounded border border-white/10 text-sm" />
+                <button @click="copyLink"
+                  class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded transition text-sm">
                   {{ copied ? 'Copied' : 'Copy' }}
                 </button>
               </div>
@@ -256,166 +232,280 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'VideyClone',
-  data() {
-    return {
-      isDragging: false,
-      uploadedFile: null,
-      isPlaying: false,
-      isMuted: false,
-      progress: 0,
-      views: 0,
-      copied: false,
-      error: '',
-      uploadAdShown: false,
-      playAdShown: false,
+<script setup>
+import { ref, computed, nextTick, onBeforeUnmount } from 'vue'
+
+// === STATE ===
+const isDragging = ref(false)
+const uploadedFile = ref(null)
+const isPlaying = ref(false)
+const isMuted = ref(false)
+const playerProgress = ref(0)
+const uploadProgress = ref(0)
+const uploading = ref(false)
+const views = ref(0)
+const copied = ref(false)
+const error = ref('')
+const uploadAdShown = ref(false)
+const playAdShown = ref(false)
+const statusInterval = ref(null)
+
+const videoPlayer = ref(null)
+
+// === COMPUTED ===
+const statusBadge = computed(() => {
+  const base = 'px-3 py-1 rounded-full text-xs capitalize'
+  if (!uploadedFile.value) return base
+  if (uploadedFile.value.status === 'ready') {
+    return `${base} bg-green-500/20 text-green-200`
+  }
+  if (uploadedFile.value.status === 'failed') {
+    return `${base} bg-red-500/20 text-red-200`
+  }
+  return `${base} bg-yellow-500/20 text-yellow-200`
+})
+
+// === HELPERS ===
+function openInNewTab(url) {
+  if (!url) return
+
+  const a = document.createElement('a')
+  a.href = url
+  a.target = '_blank'
+  a.rel = 'noopener noreferrer'
+  a.style.display = 'none'
+
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
+
+// === METHODS ===
+function handleDragOver(e) {
+  e.preventDefault()
+  isDragging.value = true
+}
+
+function handleDragLeave() {
+  isDragging.value = false
+}
+
+function handleDrop(e) {
+  e.preventDefault()
+  isDragging.value = false
+  const file = e.dataTransfer.files[0]
+  if (file) {
+    triggerAd('upload')
+    processFile(file)
+  }
+}
+
+function handleFileInput(e) {
+  const file = e.target.files[0]
+  if (file) {
+    triggerAd('upload')
+    processFile(file)
+  }
+}
+
+async function processFile(file) {
+  error.value = ''
+
+  if (!file.type.startsWith('video/')) {
+    error.value = 'Hanya file video yang diperbolehkan.'
+    return
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    error.value = 'Maksimal ukuran video adalah 50MB.'
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+
+  uploading.value = true
+  uploadProgress.value = 0
+
+  await new Promise((resolve) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', '/api/videos')
+    if (csrf) {
+      request.setRequestHeader('X-CSRF-TOKEN', csrf)
     }
-  },
-  computed: {
-    statusBadge() {
-      const base = 'px-3 py-1 rounded-full text-xs capitalize'
-      if (!this.uploadedFile) return base
-      if (this.uploadedFile.status === 'ready') {
-        return `${base} bg-green-500/20 text-green-200`
+
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        uploadProgress.value = Math.round((event.loaded / event.total) * 100)
       }
-      if (this.uploadedFile.status === 'failed') {
-        return `${base} bg-red-500/20 text-red-200`
-      }
-      return `${base} bg-yellow-500/20 text-yellow-200`
     }
-  },
-  methods: {
-    handleDragOver(e) {
-      e.preventDefault()
-      this.isDragging = true
-    },
-    handleDragLeave() {
-      this.isDragging = false
-    },
-    handleDrop(e) {
-      e.preventDefault()
-      this.isDragging = false
-      const file = e.dataTransfer.files[0]
-      if (file) {
-        this.triggerAd('upload')
-        this.processFile(file)
+
+    request.onerror = () => {
+      error.value = 'Upload gagal, silakan coba lagi.'
+      uploading.value = false
+      resolve(null)
+    }
+
+    request.onload = async () => {
+      uploading.value = false
+
+      if (request.status >= 200 && request.status < 300) {
+        try {
+          const payload = JSON.parse(request.responseText)
+          const data = payload.data ?? payload
+
+          uploadProgress.value = 100
+          uploadedFile.value = {
+            name: data.name,
+            size: data.size_mb,
+            url: data.playback_url,
+            shareUrl: data.share_url,
+            status: data.status,
+            shortCode: data.short_code
+          }
+
+          views.value = data.views ?? 0
+          startStatusPolling(data.short_code)
+
+          await nextTick()
+          videoPlayer.value?.load()
+        } catch {
+          error.value = 'Upload gagal, silakan coba lagi.'
+        }
+      } else {
+        error.value = 'Upload gagal, silakan coba lagi.'
       }
-    },
-    handleFileInput(e) {
-      const file = e.target.files[0]
-      if (file) {
-        this.processFile(file)
+      resolve(null)
+    }
+
+    request.send(formData)
+  })
+}
+
+function handlePlay() {
+  togglePlay()
+  if (!playAdShown.value) {
+    triggerAd('play')
+    playAdShown.value = true
+  }
+}
+
+function togglePlay() {
+  const video = videoPlayer.value
+  if (!video) return
+
+  if (video.paused) {
+    video.play()
+    isPlaying.value = true
+  } else {
+    video.pause()
+    isPlaying.value = false
+  }
+}
+
+function toggleMute() {
+  const video = videoPlayer.value
+  if (!video) return
+
+  video.muted = !video.muted
+  isMuted.value = video.muted
+}
+
+function updateProgress() {
+  const video = videoPlayer.value
+  if (video?.duration) {
+    playerProgress.value = (video.currentTime / video.duration) * 100
+  }
+}
+
+function resetUpload() {
+  uploadedFile.value = null
+  isPlaying.value = false
+  playerProgress.value = 0
+  uploadProgress.value = 0
+  uploading.value = false
+  views.value = 0
+  copied.value = false
+  uploadAdShown.value = false
+  playAdShown.value = false
+
+  if (statusInterval.value) {
+    clearInterval(statusInterval.value)
+    statusInterval.value = null
+  }
+}
+
+async function copyLink() {
+  if (!uploadedFile.value?.shareUrl) return
+  await navigator.clipboard.writeText(uploadedFile.value.shareUrl)
+  copied.value = true
+  setTimeout(() => (copied.value = false), 2000)
+}
+
+async function triggerAd(placement) {
+  if (placement === 'upload' && uploadAdShown.value) return
+
+  try {
+    const response = await fetch(`/api/ads/${placement}`)
+    if (!response.ok) return
+
+    const ad = await response.json()
+    if (ad?.data?.safe_url) {
+      openInNewTab(ad.data.safe_url)
+      if (placement === 'upload') {
+        uploadAdShown.value = true
       }
-    },
-    async processFile(file) {
-      this.error = ''
-      if (!file.type.startsWith('video/')) {
-        this.error = 'Hanya file video yang diperbolehkan.'
-        return
-      }
+    }
+  } catch {
+    // silent fail
+  }
+}
 
-      if (file.size > 50 * 1024 * 1024) {
-        this.error = 'Maksimal ukuran video adalah 50MB. ';
-        return
-      }
+function startStatusPolling(shortCode) {
+  if (!shortCode) return
 
-      const formData = new FormData()
-      formData.append('file', file)
+  if (statusInterval.value) {
+    clearInterval(statusInterval.value)
+  }
 
-      const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+  statusInterval.value = setInterval(async () => {
+    try {
+      const response = await fetch(`/api/videos/${shortCode}`)
+      if (!response.ok) return
 
-      const response = await fetch('/api/videos', {
-        method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': csrf || ''
-        },
-        body: formData
-      })
+      const payload = await response.json()
+      const data = payload.data ?? payload
+      if (!data) return
 
-      if (!response.ok) {
-        this.error = 'Upload gagal, silakan coba lagi.'
-        return
-      }
-
-      const data = await response.json()
-
-      this.uploadedFile = {
+      uploadedFile.value = {
+        ...uploadedFile.value,
         name: data.name,
         size: data.size_mb,
         url: data.playback_url,
         shareUrl: data.share_url,
-        status: data.status
+        status: data.status,
+        shortCode: data.short_code
       }
-      this.views = 1
-      this.$nextTick(() => {
-        const video = this.$refs.videoPlayer
-        video?.load()
-      })
-    },
-    handlePlay() {
-      this.togglePlay()
-      if (!this.playAdShown) {
-        this.triggerAd('play')
-        this.playAdShown = true
-      }
-    },
-    togglePlay() {
-      const video = this.$refs.videoPlayer
-      if (!video) return
-      if (video.paused) {
-        video.play()
-        this.isPlaying = true
-      } else {
-        video.pause()
-        this.isPlaying = false
-      }
-    },
-    toggleMute() {
-      const video = this.$refs.videoPlayer
-      if (!video) return
-      video.muted = !video.muted
-      this.isMuted = video.muted
-    },
-    updateProgress() {
-      const video = this.$refs.videoPlayer
-      if (video?.duration) {
-        this.progress = (video.currentTime / video.duration) * 100
-      }
-    },
-    resetUpload() {
-      this.uploadedFile = null
-      this.isPlaying = false
-      this.progress = 0
-      this.views = 0
-      this.copied = false
-      this.uploadAdShown = false
-      this.playAdShown = false
-    },
-    async copyLink() {
-      if (!this.uploadedFile?.shareUrl) return
-      await navigator.clipboard.writeText(this.uploadedFile.shareUrl)
-      this.copied = true
-      setTimeout(() => (this.copied = false), 2000)
-    },
-    async triggerAd(placement) {
-      if (placement === 'upload' && this.uploadAdShown) return
 
-      const response = await fetch(`/api/ads/${placement}`)
-      if (!response.ok) return
+      views.value = data.views ?? views.value
 
-      const ad = await response.json()
-      if (ad && ad.safe_url) {
-        window.open(ad.safe_url, '_blank', 'noopener')
-        if (placement === 'upload') {
-          this.uploadAdShown = true
-        }
+      if (data.status === 'ready' || data.status === 'failed') {
+        clearInterval(statusInterval.value)
+        statusInterval.value = null
       }
-    }
-  }
+    } catch { }
+  }, 3000)
 }
+
+onBeforeUnmount(() => {
+  if (statusInterval.value) {
+    clearInterval(statusInterval.value)
+  }
+})
 </script>
+
 
 <style scoped>
 /* Tailwind CSS handles styling */
